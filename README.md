@@ -41,7 +41,7 @@ Due to the copyright restrictions of the source datasets, we can't share the fil
   <summary>1. Car number plates</summary>
 
 **5. Finding and analyzing number plates**
-  1.  Go to [Finding and providing us with number on car plates](https://huggingface.co/datasets/keremberke/license-plate-object-detection) page on HugginFace.
+  1.  Go to [Car number plates dataset](https://huggingface.co/datasets/keremberke/license-plate-object-detection) page on HugginFace.
   2. Login to your HugginFace account.
   3. Download the data.
   4. Extract `archive.zip`.
@@ -52,7 +52,7 @@ Due to the copyright restrictions of the source datasets, we can't share the fil
   <summary>2. Car brand detection</summary>
 
 **6. Brain CT Images with Intracranial Hemorrhage Masks**
-  1. Go to [Brain With Intracranial Hemorrhage](https://www.kaggle.com/datasets/alirezaatashnejad/over-20-car-brands-dataset) page on Kaggle.
+  1. Go to [20 car brands photos dataset](https://www.kaggle.com/datasets/alirezaatashnejad/over-20-car-brands-dataset) page on Kaggle.
   2. Login to your Kaggle account.
   3. Download the data.
   4. Extract `aover-20-car-brands-dataset.zip`.
