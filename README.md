@@ -102,8 +102,3 @@ poetry add <package_name>
 ## Debugging
 
 To modify and debug the app, [development in containers](https://davidefiocco.github.io/debugging-containers-with-vs-code) can be useful .
-
-## Testing
-```bash
-run_tests.sh
-```
