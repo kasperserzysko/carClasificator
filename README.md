@@ -2,11 +2,11 @@
 
 <!-- Badges -->
 <p>
-  <a href="https://github.com/TheLion-ai/UMIE_datasets/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/TheLion-ai/UMIE_datasets" alt="contributors" />
+  <a href="https://github.com/kasperserzysko/carClasificatorgraphs/contributors">
+    <img src="https://img.shields.io/github/contributors/kasperserzysko/carClasificator" alt="contributors" />
   </a>
   <a href="">
-    <img src="https://img.shields.io/github/last-commit/TheLion-ai/UMIE_datasets" alt="last update" />
+    <img src="https://img.shields.io/github/last-commit/kasperserzysko/carClasificator" alt="last update" />
   </a>
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
     <img src="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg" alt="license" />
@@ -38,7 +38,7 @@ poetry install
 Due to the copyright restrictions of the source datasets, we can't share the files directly. To obtain the full dataset you have to download the source datasets yourself and run the preprocessing scripts.
 
 <details>
-  <summary>5. Car number plates</summary>
+  <summary>1. Car number plates</summary>
 
 **5. Finding and analyzing number plates**
   1.  Go to [Finding and providing us with number on car plates](https://huggingface.co/datasets/keremberke/license-plate-object-detection) page on HugginFace.
@@ -49,7 +49,7 @@ Due to the copyright restrictions of the source datasets, we can't share the fil
 </details>
 
 <details>
-  <summary>6. Car brand detection</summary>
+  <summary>2. Car brand detection</summary>
 
 **6. Brain CT Images with Intracranial Hemorrhage Masks**
   1. Go to [Brain With Intracranial Hemorrhage](https://www.kaggle.com/datasets/alirezaatashnejad/over-20-car-brands-dataset) page on Kaggle.
@@ -67,20 +67,16 @@ Overall analysis of dataset here:
 
 
 ## 🎯 Roadmap
-- [X] dcm
-- [x] jpg
-- [x] nii
-- [x] tif
-- [x] Shared radlex ontology
-- [ ] Huggingface datasets
+- [x]  Huggingface datasets
+- [x] Kaggle datasets
 - [ ] Data dashboards
 
 
 <!-- Contributing -->
 ## :wave: Contributors
 
-<a href="https://github.com/TheLion-ai/UMIE_datasets/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=TheLion-ai/UMIE_datasets" />
+<a href="https://github.com/kasperserzysko/carClasificatorgraphs/contributors">
+  <img src="https://contrib.rocks/image?repo=kasperserzysko/carClasificatorgraphs" />
 </a>
 
 
