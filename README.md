@@ -38,24 +38,24 @@ poetry install
 Due to the copyright restrictions of the source datasets, we can't share the files directly. To obtain the full dataset you have to download the source datasets yourself and run the preprocessing scripts.
 
 <details>
-  <summary>1. Car number plates</summary>
+  <summary>1. Wykrywanie tablic rejestracyjnych</summary>
 
-**5. Finding and analyzing number plates**
-  1.  Go to [Car number plates dataset](https://huggingface.co/datasets/keremberke/license-plate-object-detection) page on HugginFace.
-  2. Login to your HugginFace account.
-  3. Download the data.
-  4. Extract `archive.zip`.
+**5. Wykrywanie tablic rejestracyjnych**
+  1. Przejdz na [Car number plates dataset](https://huggingface.co/datasets/keremberke/license-plate-object-detection) strona HugginFace.
+  2. Zaloguj sie na swoje konto.
+  3. Pobierz zbior danych.
+  4. Wypakuj `archive.zip`.
 
 </details>
 
 <details>
-  <summary>2. Car brand detection</summary>
+  <summary>2. Wykrywanie marek pojazdow</summary>
 
-**6. Brain CT Images with Intracranial Hemorrhage Masks**
-  1. Go to [20 car brands photos dataset](https://www.kaggle.com/datasets/alirezaatashnejad/over-20-car-brands-dataset) page on Kaggle.
-  2. Login to your Kaggle account.
-  3. Download the data.
-  4. Extract `aover-20-car-brands-dataset.zip`.
+**2.Wykrywanie marek pojazdow **
+  1. Przejdz na [20 car brands photos dataset](https://www.kaggle.com/datasets/alirezaatashnejad/over-20-car-brands-dataset) strona Kaggle .
+  2. Zaloguj sie na swoje konto Kaggle.
+  3. Pobierz zbior do folderu glownego.
+  4. Wypakuj `over-20-car-brands-dataset.zip` uzyj do tego pliku car-clasificator/datasets/car_brands.py.
 
 </details>
 
