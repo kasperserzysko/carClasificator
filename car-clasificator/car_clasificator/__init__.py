@@ -1,74 +1,121 @@
-from ultralytics import YOLO
-import torch
-import cv2
+import tkinter as tk
+from tkinter import filedialog
+import concurrent.futures
+from car_detector import video_process, image_process
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-VIDEO_PATH ="C:/Users/kaspe/Desktop/sample video/sample2.mp4"
-
-def draw_border(img, top_left, bottom_right, color=(0, 255, 0), thickness=10, line_length_x=200, line_length_y=200):
-    x1, y1 = top_left
-    x2, y2 = bottom_right
-
-    cv2.line(img, (x1, y1), (x1, y1 + line_length_y), color, thickness)  #-- top-left
-    cv2.line(img, (x1, y1), (x1 + line_length_x, y1), color, thickness)
-
-    cv2.line(img, (x1, y2), (x1, y2 - line_length_y), color, thickness)  #-- bottom-left
-    cv2.line(img, (x1, y2), (x1 + line_length_x, y2), color, thickness)
-
-    cv2.line(img, (x2, y1), (x2 - line_length_x, y1), color, thickness)  #-- top-right
-    cv2.line(img, (x2, y1), (x2, y1 + line_length_y), color, thickness)
-
-    cv2.line(img, (x2, y2), (x2, y2 - line_length_y), color, thickness)  #-- bottom-right
-    cv2.line(img, (x2, y2), (x2 - line_length_x, y2), color, thickness)
-
-    return img
-
-# load models
-coco_model = YOLO('yolov8n.pt')
-license_plate_detector = YOLO("runs/detect/yolov8n_plate_rec3/weights/best.pt")
+# Function to handle file selection and storage
+def select_files():
+    filetypes = [
+        ("MP4 files", "*.mp4"),
+        ("JPEG files", "*.jpg"),
+        ("All files", "*.*")
+    ]
+    files = filedialog.askopenfilenames(title="Select Files", filetypes=filetypes)
+    if files:
+        processing_label.config(text="Image is being processed")
+        root.update_idletasks()  # Update the label immediately
+        try:
+            with open("stored_files.txt", "a") as f:
+                for file in files:
+                    f.write(file + "\n")
+            selected_file_text.config(state=tk.NORMAL)  # Enable editing
+            selected_file_text.delete(1.0, tk.END)  # Clear the text box
+            selected_file_text.insert(tk.END, files[0])  # Insert first file name
+            selected_file_text.config(state=tk.DISABLED)  # Make read-only again
+        except Exception as e:
+            processing_label.config(text=f"Error: {e}")
+        finally:
+            processing_label.config(text="")  # Clear the processing label
 
 
-CAR_CLASS_ID = 2
-cap = cv2.VideoCapture(VIDEO_PATH)
+# Function to handle directory selection
+def select_directory():
+    directory = filedialog.askdirectory(title="Select Directory")
+    if directory:
+        selected_directory_text.config(state=tk.NORMAL)  # Enable editing
+        selected_directory_text.delete(1.0, tk.END)  # Clear the text box
+        selected_directory_text.insert(tk.END, directory)  # Insert selected directory
+        selected_directory_text.config(state=tk.DISABLED)  # Make read-only again
 
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Specify the codec
-fps = cap.get(cv2.CAP_PROP_FPS)
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-out = cv2.VideoWriter('./out.mp4', fourcc, fps, (width, height))
 
+# Function to process media files
+def process_media():
+    is_completed = False
 
-ret = True
-while ret:
-    ret, frame = cap.read()
-    if ret:
-        vehicle_detections = coco_model(frame)[0]
-        detections_ = []
-        for vehicle_detection in vehicle_detections.boxes.data.tolist(): #VEHICLE DETECTION
-            veh_x1, veh_y1, veh_x2, veh_y2, conf_score, class_id = vehicle_detection
-            if int(class_id) == CAR_CLASS_ID:
-                detections_.append([veh_x1, veh_y1, veh_x2, veh_y2, conf_score])
-                draw_border(frame, (int(veh_x1), int(veh_y1)), (int(veh_x2), int(veh_y2)), 10, line_length_x=100, line_length_y=100)
-                cropped_vehicle_frame = frame[int(veh_y1):int(veh_y2), int(veh_x1):int(veh_x2), :]
+    # Display processing message
+    processing_label.config(text="MEDIA IS BEING PROCESSED")
+    processing_label.pack(pady=20)  # Show the label under the process_button
+    root.update_idletasks()  # Ensure label update is immediate
 
-                plates_detections = license_plate_detector(cropped_vehicle_frame)[0]
-                for plate_detection in plates_detections.boxes.data.tolist():
-                    x1, y1, x2, y2, conf_score, _ = plate_detection
-                    if conf_score > 0.6:
-                        print(plate_detection)
-                        #draw_border(frame, (int(x1), int(y1)), (int(x2), int(y2)), 10, line_length_x=100, line_length_y=100)
-                        cv2.rectangle(cropped_vehicle_frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 2)
+    is_video = False
+    file_path = selected_file_text.get("1.0", "end-1c")
+    if file_path.endswith(".mp4"):
+        is_video = True
+    result_path = selected_directory_text.get("1.0", "end-1c")
+    name = file_name_text.get("1.0", "end-1c")
+    full_path = result_path + "/" + name
 
-                        cropped_plate = cropped_vehicle_frame[int(y1):int(y2), int(x1):int(x2), :]
+    def process_task(in_path, out_path, is_video):
+        if is_video:
+            video_process(in_path, out_path)
+            return True
+        image_process(in_path, out_path)
 
-                        cropped_plate_gray = cv2.cvtColor(cropped_plate, cv2.COLOR_BGR2GRAY)
-                        _, cropped_plate_thresh = cv2.threshold(cropped_plate_gray, 64, 255, cv2.THRESH_BINARY_INV)
+    # Submit the processing task to an executor (thread or process)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(process_task, file_path, full_path, is_video)
+        is_completed = future.result()
 
-        out.write(frame)
-        frame = cv2.resize(frame, (1280, 720))
+    if is_completed:
+        processing_label.config(text="MEDIA HAS BEEN PROCESSED")
 
-cv2.destroyAllWindows()
-out.release()
-cap.release()
+# Set up the main window
+root = tk.Tk()
+root.title("File Storage App")
+root.geometry("800x600")  # Set window resolution
+
+# Set up a frame to hold the file selection elements
+file_frame = tk.Frame(root)
+file_frame.pack(pady=20)
+
+# Set up the read-only text box for displaying selected file name
+selected_file_text = tk.Text(file_frame, height=1, width=80, state=tk.DISABLED)
+selected_file_text.pack(side=tk.LEFT, padx=5)
+
+# Set up the button for selecting files
+button = tk.Button(file_frame, text="Select and Store Files", command=select_files)
+button.pack(side=tk.LEFT)
+
+# Set up a frame to hold the directory selection elements
+dir_frame = tk.Frame(root)
+dir_frame.pack(pady=20)
+
+# Set up the read-only text box for displaying selected directory
+selected_directory_text = tk.Text(dir_frame, height=1, width=80, state=tk.DISABLED)
+selected_directory_text.pack(side=tk.LEFT, padx=5)
+
+# Set up the button for selecting directory
+dir_button = tk.Button(dir_frame, text="Select Directory", command=select_directory)
+dir_button.pack(side=tk.LEFT)
+
+# Set up the label for displaying selected file name
+file_name_frame = tk.Frame(root)
+file_name_frame.pack(pady=10, padx=20, fill=tk.X)
+
+file_name_label = tk.Label(file_name_frame, text="File name:", anchor="e", width=12)
+file_name_label.pack(side=tk.LEFT)
+
+file_name_text = tk.Text(file_name_frame, height=1, width=80)
+file_name_text.pack(side=tk.LEFT)
+
+# Set up the processing label
+processing_label = tk.Label(root, text="", font=("Helvetica", 16))
+processing_label.pack(pady=20)
+
+# Set up the button for processing media
+process_button = tk.Button(root, text="Process Media", command=process_media)
+process_button.pack(pady=20)
+
+# Run the application
+root.mainloop()
