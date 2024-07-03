@@ -1,0 +1,1 @@
+link do modelu: https://drive.google.com/drive/u/5/folders/1lHCAWVsYZFXRMFX7GxbosFiLqR-UqKDM
