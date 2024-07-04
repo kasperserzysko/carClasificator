@@ -2,13 +2,58 @@ import cv2
 from ultralytics import YOLO    #toDO to  wyrzucic (uzyc pytorch)
 from util import draw_border, display_plate, display_plate_image
 from plate_recognision import read_license_plate
+import numpy as np
+import torch
+from torchvision import transforms, models
+from torch.autograd import Variable
+from PIL import Image
+import torch.nn as nn
 
 coco_model = YOLO('yolov8n.pt')     #PATRZ
-license_plate_detector = YOLO("runs/detect/yolov8n_plate_rec3/weights/best.pt")     #PATRZ
-
+license_plate_detector = YOLO("C:/Users/kacpk/PycharmProjects/carClasificator/car-clasificator/car_clasificator/best.pt")     #PATRZ
+resnet_model_path = '../utilities/car_brand_classifier_resnet.pth'
 
 CAR_CLASS_ID = 2
+transform = transforms.Compose([
+    transforms.Grayscale(num_output_channels=3),
+    transforms.Resize((224, 224)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomResizedCrop((224, 224), scale=(0.9, 1.1)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
 
+car_brands = ['alfa romeo', 'Audi', 'Bentley', 'Benz','Bmw', 'Cadillac', 'Dodge', 'Ferrari', 'Ford','Ford mustang', 'hyundai', 'Kia','Lamborghini', 'Lexus', 'Maserati', 'Porsche', 'Rolls royce', 'Tesla', 'Toyota' ]
+
+model_path = '../utilities/output/car_brand_classifier_resnet.pth'
+def load_model(model_path, num_classes):
+    model = models.resnet50(pretrained=False)
+    num_features = model.fc.in_features
+    model.fc = nn.Linear(num_features, num_classes)
+    model.load_state_dict(torch.load(model_path))
+    return model
+model = load_model(model_path,19)
+model.eval()
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = model.to(device)
+
+
+def predict_car_brand(image, model, transform, device):
+    if isinstance(image, str):  # If image is a file path
+        image = Image.open(image)
+    else:  # If image is already a numpy array (cropped frame)
+        image = Image.fromarray(image)
+
+    # Convert PIL image to Tensor
+    image = transform(image).unsqueeze(0).to(device)
+
+    with torch.no_grad():
+        output = model(image)
+        _, predicted = torch.max(output, 1)
+        predicted_label = predicted.item()
+
+    return predicted_label
 
 def video_process(in_path, out_path):
 
@@ -31,7 +76,10 @@ def video_process(in_path, out_path):
                     draw_border(frame, (int(veh_x1), int(veh_y1)), (int(veh_x2), int(veh_y2)), 10, line_length_x=100,
                                 line_length_y=100)
                     cropped_vehicle_frame = frame[int(veh_y1):int(veh_y2), int(veh_x1):int(veh_x2), :]
-
+                    car_brand_idx = predict_car_brand(cropped_vehicle_frame, model, transform, device)
+                    car_brand = car_brands[car_brand_idx]
+                    cv2.putText(frame, car_brand, (int(veh_x1) - 20, int(veh_y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 2,
+                                (0, 0, 0), 2)
                     plates_detections = license_plate_detector(cropped_vehicle_frame)[0]
                     for plate_detection in plates_detections.boxes.data.tolist():
                         x1, y1, x2, y2, conf_score, _ = plate_detection
@@ -40,10 +88,12 @@ def video_process(in_path, out_path):
 
                             cropped_plate = cropped_vehicle_frame[int(y1):int(y2), int(x1):int(x2), :]
 
+
+
                             license_plate_text, license_plate_text_score = read_license_plate(cropped_plate)
                             if license_plate_text is not None:
                                 display_plate(frame, cropped_plate, license_plate_text, veh_y1, veh_x2, veh_x1)
-                    # TODO dorzuc tutaj marke auta
+
 
             out.write(frame)
             cv2.resize(frame, (1280, 720))
@@ -56,6 +106,11 @@ def image_process(in_path, out_path):
     image = cv2.imread(in_path)
 
     plates_detections = license_plate_detector(image)[0]
+    car_brand_idx = predict_car_brand(in_path, model, transform, device)
+    car_brand = car_brands[car_brand_idx]
+    x1, y1, _ = image.shape
+    cv2.putText(image, car_brand, (int(x1)-200, int(y1) - 405), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0),
+                2)
     for plate_detection in plates_detections.boxes.data.tolist():
         x1, y1, x2, y2, conf_score, _ = plate_detection
         if conf_score > 0.6:
@@ -67,5 +122,5 @@ def image_process(in_path, out_path):
             if license_plate_text is not None:
                  print("PLATE: ", license_plate_text)
             display_plate_image(image, cropped_plate, license_plate_text, y1, x2, x1)
-            # TODO dorzuc tutaj marke auta
+          
     cv2.imwrite(out_path + ".jpg", image)

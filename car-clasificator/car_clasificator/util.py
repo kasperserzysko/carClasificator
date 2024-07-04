@@ -47,7 +47,7 @@ def display_plate(frame, cropped_plate, license_plate_text, veh_y1, veh_x2, veh_
 def display_plate_image(frame, cropped_plate, license_plate_text, y1, x2, x1):
     H, W, _ = cropped_plate.shape
     if license_plate_text == None:
-        license_plate_text = "DUPA"
+        return
 
     (text_width, text_height), _ = cv2.getTextSize(
         license_plate_text,
