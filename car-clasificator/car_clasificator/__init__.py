@@ -67,8 +67,8 @@ def process_media():
         future = executor.submit(process_task, file_path, full_path, is_video)
         is_completed = future.result()
 
-    if is_completed:
-        processing_label.config(text="MEDIA HAS BEEN PROCESSED")
+    processing_label.config(text="MEDIA HAS BEEN PROCESSED")
+    root.update_idletasks()
 
 # Set up the main window
 root = tk.Tk()
