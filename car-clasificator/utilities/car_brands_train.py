@@ -9,9 +9,9 @@ import torch.optim as optim
 from sklearn.metrics import f1_score, recall_score, precision_score
 from tqdm import tqdm
 
-# Parameters
+#parametry
 data_dir = '../data'
-output_dir = 'output'
+output_dir = '../../output'
 os.makedirs(output_dir, exist_ok=True)
 batch_size = 32
 img_height = 224
@@ -21,6 +21,7 @@ learning_rate = 0.001
 validation_split = 0.2
 model_path = os.path.join(output_dir, 'car_brand_classifier_resnet.pth')
 
+#transformacje danych
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
     transforms.Resize((img_height, img_width)),
@@ -30,6 +31,7 @@ transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
+#przygotowanie oraz podzial zbioru danych
 dataset = datasets.ImageFolder(root=data_dir, transform=transform)
 val_size = int(len(dataset) * validation_split)
 train_size = len(dataset) - val_size
@@ -38,6 +40,7 @@ train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
+#zaladowanie modelu ResNet50
 model = models.resnet50(pretrained=True)
 num_features = model.fc.in_features
 model.fc = nn.Linear(num_features, len(dataset.classes))
@@ -49,10 +52,11 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs):
+    # Inicjalizacja słownika do przechowywania historii metryk
     history = {'train_loss': [], 'val_loss': [], 'train_accuracy': [], 'val_accuracy': [],
                'train_f1': [], 'val_f1': [], 'train_precision': [], 'val_precision': [],
                'train_recall': [], 'val_recall': []}
-
+    #petla przechodzaca przez kazda epoke
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
@@ -60,7 +64,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         total = 0
         all_preds = []
         all_labels = []
-
+        #petla po danych treningowych z dodanym paskiem postepu jako tqdm
         for images, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs} - Training"):
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
@@ -81,7 +85,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         epoch_f1 = f1_score(all_labels, all_preds, average='weighted')
         epoch_precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
         epoch_recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
-
+        # zapisywanie wynikow treningu do slownika
         history['train_loss'].append(epoch_loss)
         history['train_accuracy'].append(epoch_accuracy)
         history['train_f1'].append(epoch_f1)
@@ -94,7 +98,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         total = 0
         all_preds = []
         all_labels = []
-
+        #petla po danych walidacyjnych bez gradientu
         with torch.no_grad():
             for images, labels in tqdm(val_loader, desc=f"Epoch {epoch+1}/{num_epochs} - Validation"):
                 images, labels = images.to(device), labels.to(device)
@@ -113,7 +117,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         val_f1 = f1_score(all_labels, all_preds, average='weighted')
         val_precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
         val_recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
-
+        #zapisywanie wynikow walidacji do slownika
         history['val_loss'].append(val_loss)
         history['val_accuracy'].append(val_accuracy)
         history['val_f1'].append(val_f1)
@@ -127,10 +131,11 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
 
     return history
 
-
+#zapisywanie model
 history = train_model(model, train_loader, val_loader, criterion, optimizer, epochs)
 torch.save(model.state_dict(), model_path)
 
+#tworzeniw wykresu dla wizualizacji treningu oraz walidacji korzystajac ze wczesniej usatlonych metryk
 plt.figure(figsize=(12, 8))
 plt.subplot(2, 2, 1)
 plt.plot(history['train_loss'], label='Training Loss')

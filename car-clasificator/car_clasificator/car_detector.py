@@ -14,6 +14,7 @@ license_plate_detector = YOLO("C:/Users/kacpk/PycharmProjects/carClasificator/ca
 resnet_model_path = '../utilities/car_brand_classifier_resnet.pth'
 
 CAR_CLASS_ID = 2
+#transoframcja danych do wykorzystania przy szukaniu marek samochodow
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
     transforms.Resize((224, 224)),
@@ -25,8 +26,10 @@ transform = transforms.Compose([
 
 car_brands = ['alfa romeo', 'Audi', 'Bentley', 'Benz','Bmw', 'Cadillac', 'Dodge', 'Ferrari', 'Ford','Ford mustang', 'hyundai', 'Kia','Lamborghini', 'Lexus', 'Maserati', 'Porsche', 'Rolls royce', 'Tesla', 'Toyota' ]
 
-model_path = '../utilities/output/car_brand_classifier_resnet.pth'
+model_path = '../../output/car_brand_classifier_resnet.pth'
+
 def load_model(model_path, num_classes):
+    # zaladowanie modelu ResNet50 za pomoca sciezki do pliku
     model = models.resnet50(pretrained=False)
     num_features = model.fc.in_features
     model.fc = nn.Linear(num_features, num_classes)
@@ -40,14 +43,16 @@ model = model.to(device)
 
 
 def predict_car_brand(image, model, transform, device):
-    if isinstance(image, str):  # If image is a file path
+    #sprawdzamy czy zostala przeslana sciezka pliku do zdjecia do rozpoznania czy klatka wycieta z filmu
+    if isinstance(image, str):
         image = Image.open(image)
-    else:  # If image is already a numpy array (cropped frame)
+    else:
         image = Image.fromarray(image)
 
-    # Convert PIL image to Tensor
+    # zamina PIL image na tensor
     image = transform(image).unsqueeze(0).to(device)
 
+    #predykcja marki samochodu
     with torch.no_grad():
         output = model(image)
         _, predicted = torch.max(output, 1)
