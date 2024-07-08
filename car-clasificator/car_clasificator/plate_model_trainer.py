@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 
-DATA_PATH = 'D:\kasperserzysko_repository\dynaApp\carClasificator\data\plate_rec\data.yaml'
-MODEL_PATH_RESUME = "D:/kasperserzysko_repository/dynaApp/carClasificator/runs/detect/yolov8n_plate_rec3/weights/last.pt"
+DATA_PATH = 'data_for_plate_recognition.yaml' #wstawic sciezke do danych treningowych dla yolo v8
+MODEL_PATH_RESUME = "your_model_path.pt"    #wstaw sciezke do swojego modelu
 MODEL_PATH = "yolov8n.pt"
 
 # Load a model
