@@ -11,7 +11,7 @@ import torch.nn as nn
 
 coco_model = YOLO('yolov8n.pt')
 license_plate_detector = YOLO("your_model_path.pt")     #wstaw sciezke do swojego modelu
-resnet_model_path = '../utilities/car_brand_classifier_resnet.pth'
+resnet_model_path = 'utilities/car_brand_classifier_resnet.pth'
 
 CAR_CLASS_ID = 2
 #transoframcja danych do wykorzystania przy szukaniu marek samochodow

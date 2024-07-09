@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 #parametry
 data_dir = '../data'
-output_dir = '../../output'
+output_dir = '../../../output'
 os.makedirs(output_dir, exist_ok=True)
 batch_size = 32
 img_height = 224
