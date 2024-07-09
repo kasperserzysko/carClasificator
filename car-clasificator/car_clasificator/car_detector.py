@@ -1,15 +1,15 @@
 import cv2
-from ultralytics import YOLO    #toDO to  wyrzucic (uzyc pytorch)
+from ultralytics import YOLO
 from util import draw_border, display_plate, display_plate_image
 from plate_recognision import read_license_plate
-import numpy as np
+
 import torch
 from torchvision import transforms, models
-from torch.autograd import Variable
+
 from PIL import Image
 import torch.nn as nn
 
-coco_model = YOLO('yolov8n.pt')     #PATRZ
+coco_model = YOLO('yolov8n.pt')
 license_plate_detector = YOLO("your_model_path.pt")     #wstaw sciezke do swojego modelu
 resnet_model_path = '../utilities/car_brand_classifier_resnet.pth'
 
